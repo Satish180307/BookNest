@@ -16,4 +16,13 @@ COPY --from=build /app/target/booknest-backend-1.0.0.jar app.jar
 
 EXPOSE 10000
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Network test: check if we can reach Aiven before starting the app
+RUN echo '#!/bin/bash\n\
+echo "=== Testing connection to Aiven ==="\n\
+timeout 5 bash -c "cat < /dev/null > /dev/tcp/booknest-db-booknest-db.e.aivencloud.com/14605" \
+&& echo "TCP CONNECTION: SUCCESS" \
+|| echo "TCP CONNECTION: FAILED"\n\
+echo "=== Starting app ==="\n\
+exec java -jar app.jar' > /app/start.sh && chmod +x /app/start.sh
+
+ENTRYPOINT ["/app/start.sh"]
