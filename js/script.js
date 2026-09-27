@@ -4,8 +4,7 @@
  */
 
 // Centralized API Base URL configuration
-const API_BASE_URL = "http://localhost:8080/api";
-
+const API_BASE_URL = "https://booknest-backend-3ilg.onrender.com/api";
 // Application state
 let currentBooks = [];
 let currentCategory = "All";

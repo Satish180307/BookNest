@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Cross-Origin Resource Sharing (CORS) Configuration.
- * Configured for frontend development servers (Live Server, Python HTTP server, standard local ports).
+ * Allows the BookNest frontend to communicate with the Spring Boot backend.
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
@@ -17,7 +17,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                         "http://localhost:[*]",
                         "http://127.0.0.1:[*]",
-                        "null"
+                        "https://*.netlify.app"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
