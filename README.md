@@ -1,85 +1,95 @@
 # BookNest: Smart Online Book Explorer
 
-A complete full-stack web application designed for exploring academic and general books, filtering by categories, sorting dynamically, managing personal favorites, and registering new books. Built with a clean Model-View-Controller (MVC) architecture using Spring Boot, Spring JDBC (JdbcTemplate), MySQL 8, and a responsive frontend.
+A full-stack web application for exploring academic and general books, filtering by category, sorting, managing favorites, and registering new books. Built with Spring Boot, Spring JDBC (`JdbcTemplate`), MySQL 8, and a responsive Bootstrap frontend.
+
+## Live Demo
+
+- **Website:** [https://satish180307.github.io/BookNest/](https://satish180307.github.io/BookNest/)
+- **Backend API:** [https://booknest-backend-3ilg.onrender.com/api/books](https://booknest-backend-3ilg.onrender.com/api/books)
+
+> The backend runs on Render's free tier, which sleeps after inactivity. The first request after a idle period can take about 50 seconds.
+
+---
+
+## Table of Contents
+
+1. [Project Overview](#1-project-overview)
+2. [Key Features](#2-key-features)
+3. [Technology Stack](#3-technology-stack)
+4. [Architecture](#4-architecture)
+5. [Project Structure](#5-project-structure)
+6. [Database Setup](#6-database-setup)
+7. [Run Locally](#7-run-locally)
+8. [REST API Endpoints](#8-rest-api-endpoints)
+9. [Deployment](#9-deployment)
+10. [Troubleshooting](#10-troubleshooting)
 
 ---
 
 ## 1. Project Overview
 
-BookNest provides a clean, academic book exploration platform. It is built as a complete full-stack project where:
-- The frontend is built using standard HTML5, CSS3, JavaScript, and Bootstrap 5.
-- The backend is a Spring Boot application providing RESTful endpoints.
-- Database access is handled via Spring JDBC using `JdbcTemplate` with parameterized queries.
-- Data is stored in a relational MySQL 8 database named `booknest_db`.
-- No JPA, Hibernate, or frontend local storage fallbacks are used for database entities.
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+), and Bootstrap 5, hosted on GitHub Pages.
+- **Backend:** Spring Boot REST API, hosted on Render (Docker).
+- **Database:** MySQL 8 (`booknest_db`), hosted on Aiven.
+- **Data access:** Spring JDBC with `JdbcTemplate` and parameterized queries. No JPA or Hibernate.
+- **No fake data:** the frontend shows real data from MySQL only. If the backend is unreachable, it shows an error notice instead.
 
 ---
 
 ## 2. Key Features
 
-- **Dynamic Catalog:** Browse books loaded directly from the MySQL database through Spring Boot REST APIs.
-- **Category Filtering:** Filter books across Programming, Database, Web Development, AI, and Fiction with zero page reloads.
-- **Dynamic Sorting:** Sort books via backend query parameters by Featured, Rating High to Low, Price Low to High, Price High to Low, and Name A-Z.
-- **Book Details Modal:** Inspect detailed metadata (title, author, ISBN, category, price, availability, and description) fetched from MySQL.
-- **Favorites Management:** Add and remove books from favorites stored permanently in MySQL.
-- **Book Registration:** Register new books via an HTML5 validated form submitting JSON payloads to `POST /api/books`.
-- **Surprise Me:** Discover a random title from the collection at the click of a button.
-- **Non-Intrusive Notifications:** Bootstrap toasts confirm user actions like adding books or toggling favorites.
-- **Responsive Design:** Clean, academic light visual style without purple gradients, excessive animations, or horizontal scrolling.
+- **Dynamic catalog:** books load from MySQL through the REST API.
+- **Category filtering:** Programming, Database, Web Development, AI, and Fiction, with no page reload.
+- **Sorting:** Featured, Rating (high to low), Price (low to high), Price (high to low), and Name (A-Z).
+- **Book details modal:** title, author, ISBN, category, price, availability, rating, and description.
+- **Favorites:** add and remove favorites, stored permanently in MySQL.
+- **Book registration:** a validated form that submits JSON to `POST /api/books`.
+- **Surprise Me:** opens a random book from the current list.
+- **Toast notifications:** confirm actions such as adding a book or toggling a favorite.
+- **Responsive design:** works on desktop and mobile.
 
 ---
 
 ## 3. Technology Stack
 
-### Frontend
-- **HTML5:** Semantic document structure and native form constraint validation.
-- **CSS3:** Custom styles, CSS variables, and responsive media queries.
-- **Bootstrap 5 (v5.3.3):** Responsive 12-column grid, navbar, modal, and toast components.
-- **JavaScript (ES6+):** Pure vanilla JavaScript communicating with the backend using the Fetch API.
-
-### Backend
-- **Java:** Object-oriented backend language (compatible with Java 17+ and JDK 26).
-- **Spring Boot (3.2.5):** Application framework and REST API controller layer.
-- **Spring Web:** HTTP request routing and JSON serialization.
-- **Spring JDBC (`JdbcTemplate`):** Direct SQL query execution with parameterization (no JPA, no Hibernate).
-- **MySQL Connector/J:** Official JDBC driver for MySQL communication.
-
-### Database
-- **MySQL Server 8.0+:** Relational database storing catalog books and user favorites.
-- **Database Name:** `booknest_db`.
-
-### Build Tool
-- **Apache Maven 3.9+:** Dependency management and build packaging.
+| Layer | Technology |
+|---|---|
+| Frontend | HTML5, CSS3, JavaScript (Fetch API), Bootstrap 5.3.3 |
+| Backend | Java 17, Spring Boot 3.2.5, Spring Web, Spring JDBC |
+| Database | MySQL 8 (Aiven) |
+| Driver | MySQL Connector/J 8.3.0 |
+| Connection pool | HikariCP |
+| Build tool | Apache Maven 3.9+ |
+| Containerization | Docker (multi-stage build) |
+| Hosting | GitHub Pages (frontend), Render (backend), Aiven (database) |
 
 ---
 
-## 4. MVC Architecture
-
-BookNest strictly separates concerns across the Model-View-Controller layers:
+## 4. Architecture
 
 ```
-USER INTERFACE (Browser)
-       |
-       | HTTP Requests (fetch JSON)
-       v
-CONTROLLER LAYER (BookController, FavoriteController)
-       |
-       v
-SERVICE LAYER (BookService, FavoriteService)
-       |
-       v
-REPOSITORY LAYER (BookRepository, FavoriteRepository)
-       |
-       | Parameterized SQL Queries via JdbcTemplate
-       v
-DATABASE LAYER (MySQL: booknest_db)
+Browser (GitHub Pages)
+        |
+        | HTTPS requests (fetch, JSON)
+        v
+Controller layer   (BookController, FavoriteController)
+        |
+        v
+Service layer      (BookService, FavoriteService)
+        |
+        v
+Repository layer   (BookRepository, FavoriteRepository)
+        |
+        | Parameterized SQL via JdbcTemplate
+        v
+MySQL database     (booknest_db on Aiven)
 ```
 
-1. **Model:** Represents database entities (`Book.java`, `Favorite.java`) and request transfer objects (`BookRequest.java`, `ApiResponse.java`).
-2. **View:** Responsive web interface (`index.html`, `style.css`, `script.js`).
-3. **Controller:** REST API endpoints handling incoming HTTP requests, input validation, and HTTP response codes.
-4. **Service:** Encapsulates business validation rules, category checks, and query coordination.
-5. **Repository:** Executes direct, parameterized SQL statements via Spring `JdbcTemplate`.
+- **Model:** `Book`, `Favorite`, plus DTOs `BookRequest` and `ApiResponse`.
+- **View:** `index.html`, `style.css`, `script.js`.
+- **Controller:** REST endpoints, input validation, HTTP status codes.
+- **Service:** business rules and category validation.
+- **Repository:** SQL execution through `JdbcTemplate`.
 
 ---
 
@@ -94,47 +104,30 @@ BookNest/
 │   ├── terms-and-conditions.html
 │   ├── 404.html
 │   ├── favicon.svg
-│   ├── css/
-│   │   └── style.css
-│   ├── js/
-│   │   └── script.js
-│   └── assets/
-│       └── images/
+│   ├── css/style.css
+│   ├── js/script.js
+│   └── assets/images/
 │
 ├── backend/
+│   ├── Dockerfile
 │   ├── pom.xml
-│   └── src/
-│       └── main/
-│           ├── java/
-│           │   └── com/
-│           │       └── booknest/
-│           │           ├── BookNestApplication.java
-│           │           ├── controller/
-│           │           │   ├── BookController.java
-│           │           │   └── FavoriteController.java
-│           │           ├── service/
-│           │           │   ├── BookService.java
-│           │           │   └── FavoriteService.java
-│           │           ├── repository/
-│           │           │   ├── BookRepository.java
-│           │           │   └── FavoriteRepository.java
-│           │           ├── model/
-│           │           │   ├── Book.java
-│           │           │   └── Favorite.java
-│           │           ├── dto/
-│           │           │   ├── ApiResponse.java
-│           │           │   └── BookRequest.java
-│           │           └── config/
-│           │               └── CorsConfig.java
-│           │
-│           └── resources/
-│               ├── application.properties
-│               └── schema.sql
+│   └── src/main/
+│       ├── java/com/booknest/
+│       │   ├── BookNestApplication.java
+│       │   ├── controller/   (BookController, FavoriteController)
+│       │   ├── service/      (BookService, FavoriteService)
+│       │   ├── repository/   (BookRepository, FavoriteRepository)
+│       │   ├── model/        (Book, Favorite)
+│       │   ├── dto/          (ApiResponse, BookRequest)
+│       │   └── config/       (CorsConfig)
+│       └── resources/
+│           ├── application.properties
+│           └── schema.sql
 │
 ├── database/
 │   └── booknest.sql
 │
-├── index.html
+├── index.html            (root copy served by GitHub Pages)
 ├── privacy-policy.html
 ├── terms-and-conditions.html
 ├── 404.html
@@ -146,192 +139,241 @@ BookNest/
 
 ---
 
-## 6. MySQL Database Setup
+## 6. Database Setup
 
-The application uses the database named `booknest_db`.
+The application uses a MySQL database named `booknest_db`.
 
-### Step 1: Import Schema and Seed Data
-Open MySQL Workbench, MySQL Command Line Client, or your terminal, and execute:
+### Import schema and seed data
 
 ```sql
 SOURCE database/booknest.sql;
 ```
 
-Alternatively, open `database/booknest.sql` and run its contents directly in your MySQL client.
+You can also paste the contents of `database/booknest.sql` into MySQL Workbench or any MySQL client.
 
-### Step 2: Database Tables Overview
-- **`books` Table:**
-  - `id`: INT AUTO_INCREMENT PRIMARY KEY
-  - `title`: VARCHAR(255) NOT NULL
-  - `author`: VARCHAR(255) NOT NULL
-  - `isbn`: VARCHAR(50)
-  - `category`: VARCHAR(100)
-  - `price`: DECIMAL(10, 2)
-  - `availability`: BOOLEAN DEFAULT TRUE
-  - `description`: TEXT
-  - `rating`: DECIMAL(2, 1)
-  - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+### Tables
 
-- **`favorites` Table:**
-  - `id`: INT AUTO_INCREMENT PRIMARY KEY
-  - `book_id`: INT NOT NULL (Foreign Key referencing `books.id` ON DELETE CASCADE)
-  - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+**`books`**
 
-### Step 3: Seed Books Included
-1. **Java Programming** | Author: Herbert Schildt | Category: Programming | Price: Rs. 450 | Rating: 4.8/5 | Availability: Available
-2. **Python Crash Course** | Author: Eric Matthes | Category: Programming | Price: Rs. 520 | Rating: 4.7/5 | Availability: Available
-3. **Database System Concepts** | Author: Abraham Silberschatz | Category: Database | Price: Rs. 680 | Rating: 4.6/5 | Availability: Available
-4. **HTML and CSS** | Author: Jon Duckett | Category: Web Development | Price: Rs. 590 | Rating: 4.7/5 | Availability: Available
-5. **Artificial Intelligence** | Author: Stuart Russell | Category: AI | Price: Rs. 750 | Rating: 4.8/5 | Availability: Not Available
-6. **The Alchemist** | Author: Paulo Coelho | Category: Fiction | Price: Rs. 299 | Rating: 4.5/5 | Availability: Available
+| Column | Type |
+|---|---|
+| id | INT AUTO_INCREMENT PRIMARY KEY |
+| title | VARCHAR(255) NOT NULL |
+| author | VARCHAR(255) NOT NULL |
+| isbn | VARCHAR(50) |
+| category | VARCHAR(100) |
+| price | DECIMAL(10,2) |
+| availability | BOOLEAN DEFAULT TRUE |
+| description | TEXT |
+| rating | DECIMAL(2,1) |
+| created_at | TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
+
+**`favorites`**
+
+| Column | Type |
+|---|---|
+| id | INT AUTO_INCREMENT PRIMARY KEY |
+| book_id | INT NOT NULL (foreign key to `books.id`, ON DELETE CASCADE) |
+| created_at | TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
+
+### Seed books
+
+| Title | Author | Category | Price | Rating | Available |
+|---|---|---|---|---|---|
+| Java Programming | Herbert Schildt | Programming | Rs. 450 | 4.8 | Yes |
+| Python Crash Course | Eric Matthes | Programming | Rs. 520 | 4.7 | Yes |
+| Database System Concepts | Abraham Silberschatz | Database | Rs. 680 | 4.6 | Yes |
+| HTML and CSS | Jon Duckett | Web Development | Rs. 590 | 4.7 | Yes |
+| Artificial Intelligence | Stuart Russell | AI | Rs. 750 | 4.8 | No |
+| The Alchemist | Paulo Coelho | Fiction | Rs. 299 | 4.5 | Yes |
 
 ---
 
-## 7. Configuring DB_PASSWORD
+## 7. Run Locally
 
-In accordance with security requirements, database credentials are not hardcoded. The application reads the MySQL password using the `DB_PASSWORD` environment variable.
+### Prerequisites
 
-In `backend/src/main/resources/application.properties`:
+- Java 17 or later
+- Maven 3.9+
+- MySQL 8+
+- A static file server (VS Code Live Server or Python)
+
+### Backend
+
+The backend reads its database settings from environment variables, so no credentials are stored in the code.
+
+`backend/src/main/resources/application.properties`:
+
 ```properties
-server.port=8080
-spring.datasource.url=jdbc:mysql://localhost:3306/booknest_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=${DB_PASSWORD:}
+server.port=${PORT:8080}
+
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.sql.init.mode=never
+spring.sql.init.continue-on-error=true
+
+logging.level.com.booknest=INFO
+
+spring.datasource.hikari.maximum-pool-size=2
+spring.datasource.hikari.minimum-idle=1
+spring.datasource.hikari.initialization-fail-timeout=-1
+spring.datasource.hikari.connection-timeout=30000
 ```
 
-### Setting the Environment Variable:
+Set the variables, then start the app.
 
-**On Windows (PowerShell):**
+**Windows (PowerShell):**
+
 ```powershell
+$env:DB_URL="jdbc:mysql://localhost:3306/booknest_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+$env:DB_USERNAME="root"
 $env:DB_PASSWORD="your_mysql_password"
-```
-
-**On Windows (Command Prompt):**
-```cmd
-set DB_PASSWORD=your_mysql_password
-```
-
-**On Linux / macOS:**
-```bash
-export DB_PASSWORD=your_mysql_password
-```
-
----
-
-## 8. How to Build and Run the Backend
-
-Navigate to the `backend` folder:
-
-```bash
 cd backend
-```
-
-### Build with Maven:
-```bash
-mvn clean install
-```
-
-### Run the Spring Boot Application:
-```bash
 mvn spring-boot:run
 ```
 
-Alternatively, you can run the generated jar file directly:
+**Linux / macOS:**
+
 ```bash
+export DB_URL="jdbc:mysql://localhost:3306/booknest_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+export DB_USERNAME="root"
+export DB_PASSWORD="your_mysql_password"
+cd backend
+mvn spring-boot:run
+```
+
+The API starts at `http://localhost:8080`.
+
+To build and run the jar instead:
+
+```bash
+mvn clean package -DskipTests
 java -jar target/booknest-backend-1.0.0.jar
 ```
 
-The REST API server will start on:
+### Frontend
+
+In `js/script.js`, point the API constant at your local backend:
+
+```javascript
+const API_BASE_URL = "http://localhost:8080/api";
 ```
-http://localhost:8080
-```
+
+Then serve the frontend:
+
+- **VS Code Live Server:** right-click `index.html` and choose **Open with Live Server**.
+- **Python:** run `python -m http.server 5500` and open `http://localhost:5500`.
+
+For the deployed site, `API_BASE_URL` is set to `https://booknest-backend-3ilg.onrender.com/api`.
 
 ---
 
-## 9. How to Run the Frontend
+## 8. REST API Endpoints
 
-The frontend is served from the project root or the `frontend/` folder.
+### Books (`/api/books`)
 
-### Option 1: VS Code Live Server
-1. Open the `booknest` directory in VS Code.
-2. Right click `index.html` (or `frontend/index.html`) and select **"Open with Live Server"**.
-3. The site opens at `http://127.0.0.1:5500`.
-
-### Option 2: Python HTTP Server
-Run a local static server from the project directory:
-```bash
-python -m http.server 5500
-```
-Open `http://localhost:5500` in any web browser.
-
----
-
-## 10. REST API Endpoints
-
-### Books API (`/api/books`)
-| HTTP Method | Endpoint | Description |
+| Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/books` | Get all books (supports `?sort=featured`, `rating_desc`, `price_asc`, `price_desc`, `name_asc` and `?category=...`) |
-| `GET` | `/api/books/{id}` | Get single book details by ID |
-| `GET` | `/api/books/category/{category}` | Get books in a specific category |
-| `POST` | `/api/books` | Register a new book record in MySQL |
-| `PUT` | `/api/books/{id}` | Update existing book record |
-| `DELETE` | `/api/books/{id}` | Delete book record by ID |
+| GET | `/api/books` | List all books. Supports `?sort=featured\|rating_desc\|price_asc\|price_desc\|name_asc` and `?category=...` |
+| GET | `/api/books/{id}` | Get one book |
+| GET | `/api/books/category/{category}` | Get books in a category |
+| POST | `/api/books` | Register a new book |
+| PUT | `/api/books/{id}` | Update a book |
+| DELETE | `/api/books/{id}` | Delete a book |
 
-### Favorites API (`/api/favorites`)
-| HTTP Method | Endpoint | Description |
+### Favorites (`/api/favorites`)
+
+| Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/favorites` | Get all favorite books from MySQL |
-| `GET` | `/api/favorites/ids` | Get list of favorited book IDs |
-| `GET` | `/api/favorites/{bookId}/status` | Check if a book is favorited |
-| `POST` | `/api/favorites/{bookId}` | Add book to favorites in MySQL |
-| `DELETE` | `/api/favorites/{bookId}` | Remove book from favorites |
+| GET | `/api/favorites` | List favorite books |
+| GET | `/api/favorites/ids` | List favorited book IDs |
+| GET | `/api/favorites/{bookId}/status` | Check whether a book is a favorite |
+| POST | `/api/favorites/{bookId}` | Add a favorite |
+| DELETE | `/api/favorites/{bookId}` | Remove a favorite |
 
----
+### Response format
 
-## 11. How the Frontend Communicates with the Backend
-
-1. When the page loads, JavaScript invokes `GET /api/books` via the `fetch()` API.
-2. Spring Boot queries the `books` table in MySQL and returns a JSON response:
-   ```json
-   {
-     "success": true,
-     "message": "Books retrieved successfully",
-     "data": [ ... ]
-   }
-   ```
-3. JavaScript parses the response and dynamically renders the book cards into the DOM.
-4. If the backend is offline or MySQL is unreachable, a clear notification is displayed:
-   > *"Unable to load books. Please make sure the backend server is running on port 8080 and MySQL is active."*
-5. No fake data substitution occurs.
-
----
-
-## 12. How Spring JDBC and JdbcTemplate Work
-
-Unlike JPA or Hibernate which generate opaque SQL behind object-relational mapping proxies, Spring's `JdbcTemplate`:
-- Gives direct control over precise SQL execution.
-- Employs parameterized queries (`?` placeholders) which completely prevent SQL injection attacks.
-- Maps database result rows directly to Java models using `RowMapper<Book>`.
-- Generates auto-incremented primary keys using `GeneratedKeyHolder`.
-
-Example query from `BookRepository.java`:
-```java
-String sql = "SELECT id, title, author, isbn, category, price, availability, description, rating, created_at FROM books WHERE id = ?";
-Book book = jdbcTemplate.queryForObject(sql, bookRowMapper, id);
+```json
+{
+  "success": true,
+  "message": "Books retrieved successfully",
+  "data": []
+}
 ```
 
 ---
 
-## 13. Troubleshooting
+## 9. Deployment
 
-- **Error: Access denied for user 'root'@'localhost':**
-  Ensure you set the `DB_PASSWORD` environment variable before running the backend:
-  `$env:DB_PASSWORD="your_password"`
-- **Backend Port Conflict (Port 8080 already in use):**
-  Change `server.port=8081` in `application.properties` and update `const API_BASE_URL = "http://localhost:8081/api";` in `js/script.js`.
-- **CORS Issues:**
-  The backend is configured in `CorsConfig.java` to allow local ports (`http://127.0.0.1:5500`, `http://localhost:5500`, and `http://localhost:*`).
-- **Database Does Not Exist:**
-  Run `SOURCE database/booknest.sql;` in your MySQL console to create `booknest_db` and initialize tables.
+| Part | Platform | Notes |
+|---|---|---|
+| Frontend | GitHub Pages | Served from the `main` branch |
+| Backend | Render (Docker web service) | Builds from `backend/Dockerfile` |
+| Database | Aiven for MySQL | Public access enabled, SSL required |
+
+### Backend on Render
+
+Set these environment variables on the Render service (Environment tab):
+
+| Key | Value |
+|---|---|
+| `DB_URL` | `jdbc:mysql://<aiven-host>:<port>/booknest_db?sslMode=REQUIRED&serverTimezone=UTC` |
+| `DB_USERNAME` | your Aiven database user |
+| `DB_PASSWORD` | your Aiven database password |
+
+Never commit the password to GitHub. Keep it in Render's environment settings only.
+
+Render provides the `PORT` variable, and the app reads it through `server.port=${PORT:8080}`.
+
+### Dockerfile
+
+```dockerfile
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/booknest-backend-1.0.0.jar app.jar
+EXPOSE 10000
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+### CORS
+
+`config/CorsConfig.java` must allow the origin of the deployed frontend, otherwise browsers block API calls from GitHub Pages. Allowed origins:
+
+```
+https://satish180307.github.io
+http://localhost:5500
+http://127.0.0.1:5500
+```
+
+### Frontend on GitHub Pages
+
+1. Open **Settings > Pages** in the repository.
+2. Set **Source** to **Deploy from a branch**, branch `main`, folder `/ (root)`.
+3. Make sure `index.html` is in the repository root.
+4. Make sure `API_BASE_URL` in `js/script.js` points to the Render backend.
+
+---
+
+## 10. Troubleshooting
+
+- **The site shows "Unable to load books":** the Render backend may be asleep. Wait about 50 seconds and refresh. If it persists, check the Render logs.
+- **CORS error in the browser console:** add `https://satish180307.github.io` to the allowed origins in `CorsConfig.java` and redeploy.
+- **`Connection refused` on startup, with the Aiven database confirmed reachable:** check `application.properties`. If `spring.datasource.url` is hardcoded to `localhost:3306`, the app never reaches Aiven. It must be `${DB_URL}`.
+- **`Access denied for user`:** check that `DB_USERNAME` and `DB_PASSWORD` are correct in the environment.
+- **Port 8080 already in use (local):** change `server.port` and update `API_BASE_URL` in `js/script.js` to match.
+- **Database does not exist:** import `database/booknest.sql` to create `booknest_db` and its tables.
+
+---
+
+## Author
+
+Built by Satish Chandravanshi.
